@@ -1,0 +1,7 @@
+@import './base.css';
+
+@media (min-width: 1024px) {
+  body { 
+    margin: 0px
+  }
+}
