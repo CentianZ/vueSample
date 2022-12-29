@@ -77,7 +77,7 @@ const popoverRef = ref();
 // let currentDefect = ref(0)
 // let confirmDefect = ref(comfirm[currentDefect.value])
 
-const tableData = [
+const tableData = ref([
   {
     index: "01_1",
     deviceId: "Alpha1",
@@ -122,7 +122,11 @@ const tableData = [
     manualConfirmedResult: "正确",
     confirmedOwner: "Xu",
   },
-];
+]);
+
+const updateManualConfirmedResult = (index: number, result: string) => {
+  tableData.value[index].manualConfirmedResult = result;
+};
 
 interface Defect {
   index: string;
@@ -458,30 +462,38 @@ onMounted(() => {
 // 屏幕尺寸参考: (1920, 1080)
 
 // ------- 缺陷类型表格逻辑 -------
+let defectTableData = computed(() => {
+  console.log("computed trigger")
+  if (defectTypeTimePeriod.value === "日") return defectData;
+  else if (defectTypeTimePeriod.value === "周") return defectDataWeek;
+  else if (defectTypeTimePeriod.value === "月") return defectDataMonth;
+  else return defectData;
+});
+
 const defectData = [
   {
     defectType: "爆丝",
-    defectNum: "1048",
+    defectNum: "234",
   },
   {
     defectType: "缺丝",
-    defectNum: "770",
+    defectNum: "120",
   },
   {
     defectType: "抽筋起扭",
-    defectNum: "580",
+    defectNum: "80",
   },
   {
     defectType: "压伤",
-    defectNum: "484",
+    defectNum: "74",
   },
   {
     defectType: "绞花",
-    defectNum: "300",
+    defectNum: "40",
   },
   {
     defectType: "翻丝",
-    defectNum: "300",
+    defectNum: "20",
   },
 ];
 const defectDataWeek = [
@@ -510,13 +522,15 @@ const defectDataWeek = [
     defectNum: "300",
   },
 ];
+const defectDataMonth = [
+  { defectNum: "5048", defectType: "爆丝" },
+  { defectNum: "2870", defectType: "缺丝" },
+  { defectNum: "2080", defectType: "抽筋起扭" },
+  { defectNum: "1684", defectType: "压伤" },
+  { defectNum: "1200", defectType: "绞花" },
+  { defectNum: "900", defectType: "翻丝" }
+]
 
-// let defectData = computed(() => {
-//   if (defectTypeTimePeriod.value === "日") return defectDataDay
-//   else if (defectTypeTimePeriod.value === "周") return defectDataWeek
-//   else if (defectTypeTimePeriod.value === "月") return defectDataWeek
-//   else return defectDataDay
-// })
 </script>
 
 <template>
@@ -730,11 +744,20 @@ const defectDataWeek = [
                       <div>
                         <el-button
                           type="success"
-                          @click="handleEditRow(scope.$index)"
+                          @click.prevent="
+                            updateManualConfirmedResult(scope.$index, '正确')
+                          "
                         >
                           确认缺陷
                         </el-button>
-                        <el-button type="danger"> 缺陷错误 </el-button>
+                        <el-button
+                          type="danger"
+                          @click.prevent="
+                            updateManualConfirmedResult(scope.$index, '错误')
+                          "
+                        >
+                          缺陷错误
+                        </el-button>
                       </div>
                     </template>
                   </el-popover>
@@ -789,7 +812,7 @@ const defectDataWeek = [
               <el-scrollbar height="200px">
                 <div class="defect-table">
                   <el-table
-                    :data="defectData"
+                    :data="defectTableData"
                     :row-class-name="defectRow"
                     :header-cell-style="{
                       background: '#133B5E',
